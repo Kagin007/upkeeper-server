@@ -13,7 +13,42 @@ class GetAllUsersSerializer(serializers.ModelSerializer):
 class GetMemberDataSerializer(serializers.ModelSerializer):
     class Meta:
         model = Member
-        fields = ['id', 'role', 'pay_rate', 'location_id', 'user_id']
+        fields = ['id', 'role', 'pay_rate', 'location', 'user']
+
+
+class PostMemberDataSerializer(serializers.ModelSerializer):
+    user = serializers.PrimaryKeyRelatedField(many=False, queryset=User.objects.all())
+    location = serializers.PrimaryKeyRelatedField(many=False, queryset=Location.objects.all())
+
+    class Meta:
+        model = Member
+        fields = ['id', 'role', 'pay_rate', 'location', 'user']
+
+
+class GetPropertiesSerializer(serializers.ModelSerializer):
+    member_id = serializers.PrimaryKeyRelatedField(many=False, queryset=Member.objects.all())
+
+    class Meta:
+        model = Properties
+        fields = ['address', 'city', 'country', 'longitude', 'latitude', 'member_id']
+
+
+class RegisterSerializer(serializers.ModelSerializer):
+    email = serializers.EmailField(
+            required=True,
+            validators=[UniqueValidator(queryset=User.objects.all())]
+            )
+
+    password = serializers.CharField(write_only=True, required=True, validators=[validate_password])
+
+    class Meta:
+        model = User
+        # front end validates password
+        fields = ('username', 'password', 'email', 'first_name', 'last_name')
+        extra_kwargs = {
+            'first_name': {'required': True},
+            'last_name': {'required': True}
+        }
 
 # user stories
 # All Users
