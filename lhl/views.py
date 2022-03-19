@@ -10,6 +10,13 @@ from lhl.serializers import GetUserDataSerializer, GetLocationDataSerializer, Ge
     GetPropertiesSerializer, RegisterSerializer, PostMemberDataSerializer
 
 
+class allUsers(APIView):
+    def get(selfself, request):
+        data = Member.objects.all()
+        serializer = GetMemberDataSerializer(data, many=True)
+
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
 class GetUserData(APIView):
     if settings.DEBUG is False:
         permission_classes = (IsAuthenticated,)

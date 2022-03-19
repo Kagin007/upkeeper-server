@@ -16,7 +16,7 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 from rest_framework.authtoken.views import obtain_auth_token
-from lhl.views import GetUserData, LocationData, GetMember, PropertiesData, RegisterUser
+from lhl.views import GetUserData, LocationData, GetMember, PropertiesData, RegisterUser, allUsers
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -28,4 +28,5 @@ urlpatterns = [
     path('api/member', GetMember.as_view(), name='postmember'),
     path('api/properties/<int:userid>', PropertiesData.as_view(), name='properties'),
     path('api/register', RegisterUser.as_view(), name='register'),
+    path('api/users', allUsers.as_view(), name='allUsers')
 ]
