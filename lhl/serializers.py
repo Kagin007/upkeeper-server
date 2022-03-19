@@ -10,6 +10,10 @@ class GetAllUsersSerializer(serializers.ModelSerializer):
 # class GetAllCleanersSerializer(serializers.ModelSerializer):
 
 
+class GetMemberDataSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Member
+        fields = ['id', 'role', 'pay_rate', 'location_id', 'user_id']
 
 # user stories
 # All Users
