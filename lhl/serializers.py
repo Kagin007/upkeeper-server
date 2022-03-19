@@ -1,16 +1,28 @@
 from rest_framework import serializers
-from .models import Member
+from django.contrib.auth.models import User
+from lhl.models import Location, Member, Properties
+from rest_framework.validators import UniqueValidator
+from django.contrib.auth.password_validation import validate_password
 
 
-class GetAllUsersSerializer(serializers.ModelSerializer):
+class GetUserDataSerializer(serializers.ModelSerializer):
     class Meta:
-        model: Member
-        fields = ['id', 'first_name', 'last_name', 'password', 'email', 'picture_url']
+        model = User
+        fields = ['id', 'username', 'first_name', 'last_name', 'email']
 
-# class GetAllCleanersSerializer(serializers.ModelSerializer):
+
+class GetLocationDataSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Location
+        fields = ['id', 'address', 'city', 'province', 'longitude', 'latitude']
 
 
 class GetMemberDataSerializer(serializers.ModelSerializer):
+    # extends the user table into Members
+    user = GetUserDataSerializer(many=False, read_only=True)
+    location = GetLocationDataSerializer(many=False, read_only=True)
+    # user = serializers.PrimaryKeyRelatedField(many=False, read_only=True)
+
     class Meta:
         model = Member
         fields = ['id', 'role', 'pay_rate', 'location', 'user']

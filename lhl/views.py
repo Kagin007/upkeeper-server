@@ -1,23 +1,101 @@
 from rest_framework.views import APIView
 from django.conf import settings
 from rest_framework.permissions import IsAuthenticated
-from rest_framework.authentication import SessionAuthentication, BasicAuthentication
+from rest_framework import generics
 from rest_framework.response import Response
-from django.contrib.auth import authenticate, login
+from rest_framework import status
 from django.contrib.auth.models import User
-from rest_framework.exceptions import ValidationError
+from lhl.models import Member, Location, Properties
+from lhl.serializers import GetUserDataSerializer, GetLocationDataSerializer, GetMemberDataSerializer, \
+    GetPropertiesSerializer, RegisterSerializer, PostMemberDataSerializer
 
 
-class AuthenticateUser(APIView):
-    authentication_classes = [SessionAuthentication, BasicAuthentication]
-    permission_classes = [IsAuthenticated]
+class GetUserData(APIView):
+    if settings.DEBUG is False:
+        permission_classes = (IsAuthenticated,)
+
+    def get(self, request, username):
+        data = User.objects.filter(username=username)
+        serializer = GetUserDataSerializer(data, many=True)
+
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 
-    def get(self, request, format=None):
-        content = {
-            'user': str(request.user),  # `django.contrib.auth.User` instance.
-            'auth': str(request.auth),  # None
-        }
-        return Response(content)
+class LocationData(APIView):
+    if settings.DEBUG is False:
+        permission_classes = (IsAuthenticated,)
 
-# Create your views here.
+    def get(self, request, userid):
+        try:
+            memberdata = Member.objects.get(user_id=userid)
+            try:
+                locationdata = Location.objects.get(id=memberdata.location_id)
+                serializer = GetLocationDataSerializer(locationdata)
+                locations = serializer.data
+            except Location.DoesNotExist:
+                locations = []
+                return Response(locations, status=status.HTTP_400_BAD_REQUEST)
+        except Member.DoesNotExist:
+            locations = []
+            return Response(locations, status=status.HTTP_400_BAD_REQUEST)
+        return Response(locations, status=status.HTTP_200_OK)
+
+    def post(self, request):
+        # deserialize the json into objects to put into database
+        serializer = GetLocationDataSerializer(data=request.data)
+        # checks for valid form
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class GetMember(APIView):
+    if settings.DEBUG is False:
+        permission_classes = (IsAuthenticated,)
+
+    def get(self, request, userid):
+        memberdata = Member.objects.get(user_id=userid)
+        serializer = GetMemberDataSerializer(memberdata)
+
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    def post(self, request):
+        serializer = PostMemberDataSerializer(data=request.data)
+        # checks for valid form
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class PropertiesData(APIView):
+    if settings.DEBUG is False:
+        permission_classes = (IsAuthenticated,)
+
+    def get(self, request, userid):
+        memberdata = Member.objects.get(user_id=userid)
+        propertiesdata = Properties.objects.filter(member_id_id=memberdata.id)
+        serializer = GetPropertiesSerializer(propertiesdata, many=True)
+
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    def post(self, request, userid):
+        # deserialize the json into objects to put into database
+        serializer = GetPropertiesSerializer(data=request.data)
+        # checks for valid form
+        if serializer.is_valid():
+            serializer.save()
+
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class RegisterUser(APIView):
+    def post(self, request):
+        serializer = RegisterSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
