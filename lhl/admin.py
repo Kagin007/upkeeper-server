@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Member, Location, Properties
+from .models import Member, Location, Properties, Reservations
 
 
 @admin.register(Member)
@@ -15,3 +15,8 @@ class LocationAdmin(admin.ModelAdmin):
 @admin.register(Properties)
 class PropertiesAdmin(admin.ModelAdmin):
     model = Properties
+
+
+@admin.register(Reservations)
+class PropertiesAdmin(admin.ModelAdmin):
+    model = Reservations

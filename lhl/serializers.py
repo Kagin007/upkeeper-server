@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from django.contrib.auth.models import User
-from lhl.models import Location, Member, Properties
+from lhl.models import Location, Member, Properties, Reservations
 from rest_framework.validators import UniqueValidator
 from django.contrib.auth.password_validation import validate_password
 
@@ -61,6 +61,22 @@ class RegisterSerializer(serializers.ModelSerializer):
             'first_name': {'required': True},
             'last_name': {'required': True}
         }
+
+
+class GetReservationsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Reservations
+        fields = ['member_id', 'property_id', 'booking_date']
+
+
+class GetReservationsByMemberSerializer(serializers.ModelSerializer):
+    member_id = serializers.PrimaryKeyRelatedField(many=False, queryset=Member.objects.all())
+    property_id = serializers.PrimaryKeyRelatedField(many=False, queryset=Properties.objects.all())
+
+    class Meta:
+        model = Reservations
+        fields = ['member_id', 'property_id', 'booking_date']
+
 
 # user stories
 # All Users

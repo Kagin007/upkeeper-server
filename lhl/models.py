@@ -29,11 +29,11 @@ class Properties(models.Model):
     latitude = models.DecimalField(max_digits=8, decimal_places=4)
 
 
-# class Reservations(models.Model):
-    #cleaner_id
-    #owner_id
-    #property_id
-    #is_complete
+class Reservations(models.Model):
+    member_id = models.ForeignKey(Member, on_delete=models.CASCADE)
+    property_id = models.ForeignKey(Properties, on_delete=models.CASCADE)
+    booking_date = models.DateField()
+    is_complete = models.BooleanField(default=False)
 
 # class Ratings(models.Model):
     #cleaner_id

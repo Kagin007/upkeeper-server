@@ -5,17 +5,19 @@ from rest_framework import generics
 from rest_framework.response import Response
 from rest_framework import status
 from django.contrib.auth.models import User
-from lhl.models import Member, Location, Properties
+from lhl.models import Member, Location, Properties, Reservations
 from lhl.serializers import GetUserDataSerializer, GetLocationDataSerializer, GetMemberDataSerializer, \
-    GetPropertiesSerializer, RegisterSerializer, PostMemberDataSerializer
+    GetPropertiesSerializer, RegisterSerializer, PostMemberDataSerializer, GetReservationsSerializer, \
+    GetReservationsByMemberSerializer
 
 
-class allUsers(APIView):
-    def get(selfself, request):
+class AllUsers(APIView):
+    def get(self, request):
         data = Member.objects.all()
         serializer = GetMemberDataSerializer(data, many=True)
 
         return Response(serializer.data, status=status.HTTP_200_OK)
+
 
 class GetUserData(APIView):
     if settings.DEBUG is False:
@@ -106,3 +108,22 @@ class RegisterUser(APIView):
 
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class ReservationsData(APIView):
+    def get(self, request):
+        # memberdata = Member.objects.get(user_id=userid)
+        data = Reservations.objects.all()
+        serializer = GetReservationsSerializer(data, many=True)
+
+        return Response(serializer.data, status=status.HTTP_200_OK)
+        # now need a serializer for reservation data
+
+
+class MemberReservationsData(APIView):
+    def get(self, request, memberid):
+        memberdata = Member.objects.get(user_id=memberid)
+        data = Reservations.objects.filter(member_id_id=memberdata.id)
+        serializer = GetReservationsByMemberSerializer(data, many=True)
+
+        return Response(serializer.data, status.HTTP_200_OK)
