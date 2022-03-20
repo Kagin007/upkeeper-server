@@ -1,5 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
+from django.core.validators import MinValueValidator, MaxValueValidator
+
 
 
 class Location(models.Model):
@@ -28,15 +30,22 @@ class Properties(models.Model):
     longitude = models.DecimalField(max_digits=8, decimal_places=4)
     latitude = models.DecimalField(max_digits=8, decimal_places=4)
 
-
+# new
 class Reservations(models.Model):
     member_id = models.ForeignKey(Member, on_delete=models.CASCADE)
     property_id = models.ForeignKey(Properties, on_delete=models.CASCADE)
     booking_date = models.DateField()
     is_complete = models.BooleanField(default=False)
 
-# class Ratings(models.Model):
-    #cleaner_id
-    #reservation_id
-    #message
+
+class Ratings(models.Model):
+    reservation_id = models.ForeignKey(Reservations, on_delete=models.CASCADE)
+    member_id = models.ForeignKey(Member, on_delete=models.CASCADE)
+    message = models.CharField(max_length=2000)
+    rating = models.IntegerField(validators=[MinValueValidator(0), MaxValueValidator(5)])
+    average_rating = models.IntegerField()
+
+
+# TO DO
+# need to filter cleaners by date and location!!
 

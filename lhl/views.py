@@ -5,10 +5,11 @@ from rest_framework import generics
 from rest_framework.response import Response
 from rest_framework import status
 from django.contrib.auth.models import User
-from lhl.models import Member, Location, Properties, Reservations
+from lhl.models import Member, Location, Properties, Reservations, Ratings
 from lhl.serializers import GetUserDataSerializer, GetLocationDataSerializer, GetMemberDataSerializer, \
     GetPropertiesSerializer, RegisterSerializer, PostMemberDataSerializer, GetReservationsSerializer, \
-    GetReservationsByMemberSerializer
+    GetReservationsByMemberSerializer, GetRatingsByMember
+from django.db.models import Avg, Count
 
 
 class AllUsers(APIView):
@@ -127,3 +128,33 @@ class MemberReservationsData(APIView):
         serializer = GetReservationsByMemberSerializer(data, many=True)
 
         return Response(serializer.data, status.HTTP_200_OK)
+
+
+class RatingByCleaner(APIView):
+    def get(self, request, memberid):
+        avg_rating = Ratings.objects.filter(member_id_id=memberid).aggregate(Avg('rating'))
+        memberdata = Member.objects.get(user_id=memberid)
+        data = Ratings.objects.filter(member_id_id=memberdata.id, average_rating=avg_rating)
+        serializer = GetRatingsByMember(data, many=True)
+
+        return Response(serializer.data, status.HTTP_200_OK)
+
+    # const
+    # sampleData = [
+    #     {
+    #         firstName: "Winona",
+    #         lastName: "Williams",
+    #         imgURL:
+    #             "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRBwgu1A5zgPSvfE83nurkuzNEoXs9DMNr8Ww&usqp=CAU",
+    #         payRate: 60,
+    #         transportMode: "Vehicle",
+    #         avgRating: 4.5,
+    #         numRatings: 20,
+    #         topReview: {
+    #                        date: "Jan 23, 2022",
+    #                        reviewerName: "James Dean",
+    #                        rating: 5,
+    #                        reviewMessage: `Winona is spectacular and very efficient at her job.We always use her
+    #                 service to clean our apartment when we don't have time to do it
+    #                        ourselves.She responds quickly and is always on time!`,
+    # }
