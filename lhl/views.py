@@ -137,6 +137,15 @@ class RatingByCleaner(APIView):
 
         return Response(serializer.data, status.HTTP_200_OK)
 
+
+class TopRatingByCleaner(APIView):
+    def get(self, request, memberid):
+        memberdata = Member.objects.get(user_id=memberid)
+        data = Ratings.objects.filter(member_id_id=memberdata.id).order_by('-rating')[:1]
+        serializer = GetRatingsByMember(data, many=True)
+
+        return Response(serializer.data, status.HTTP_200_OK)
+
     # const
     # sampleData = [
     #     {

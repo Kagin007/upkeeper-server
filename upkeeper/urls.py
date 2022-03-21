@@ -17,7 +17,7 @@ from django.contrib import admin
 from django.urls import path
 from rest_framework.authtoken.views import obtain_auth_token
 from lhl.views import GetUserData, LocationData, GetMember, PropertiesData, RegisterUser, AllUsers, ReservationsData, \
-                        MemberReservationsData, RatingByCleaner
+                        MemberReservationsData, RatingByCleaner, TopRatingByCleaner
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -36,6 +36,6 @@ urlpatterns = [
     path('api/reservations/<int:memberid>', MemberReservationsData.as_view(), name='reservationsByMember'),
     # ratings
 
-    path('api/reservations/<int:memberid>/rating', RatingByCleaner.as_view(), name='ratingByCleaner')
-
+    path('api/member/<int:memberid>/ratings', RatingByCleaner.as_view(), name='ratingByCleaner'),
+    path('api/member/<int:memberid>/top/ratings', TopRatingByCleaner.as_view(), name='topRating')
 ]

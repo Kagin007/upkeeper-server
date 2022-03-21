@@ -18,15 +18,7 @@ class GetLocationDataSerializer(serializers.ModelSerializer):
         fields = ['id', 'address', 'city', 'province', 'longitude', 'latitude']
 
 
-class GetMemberDataSerializer(serializers.ModelSerializer):
-    # extends the user table into Members
-    user = GetUserDataSerializer(many=False, read_only=True)
-    location = GetLocationDataSerializer(many=False, read_only=True)
-    # user = serializers.PrimaryKeyRelatedField(many=False, read_only=True)
 
-    class Meta:
-        model = Member
-        fields = ['id', 'role', 'pay_rate', 'location', 'user']
 
 
 class PostMemberDataSerializer(serializers.ModelSerializer):
@@ -103,6 +95,17 @@ class GetRatingsByMember(serializers.ModelSerializer):
         rating_count = Ratings.objects.filter(member_id=obj.member_id).count()
         return rating_count
 
+
+class GetMemberDataSerializer(serializers.ModelSerializer):
+    # extends the user table into Members
+    user = GetUserDataSerializer(many=False, read_only=True)
+    location = GetLocationDataSerializer(many=False, read_only=True)
+    # user = serializers.PrimaryKeyRelatedField(many=False, read_only=True)
+    rating = GetRatingsByMember(many=True, read_only=True)
+
+    class Meta:
+        model = Member
+        fields = ['id', 'role', 'pay_rate', 'location', 'user', 'rating']
 # avg = Ratings.objects.filter(member_id_id=memberid).aggregate(avg=Avg('rating'))
 
 # user stories
