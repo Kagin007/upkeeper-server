@@ -30,7 +30,7 @@ urlpatterns = [
     path('api/properties/<int:userid>', PropertiesData.as_view(), name='properties'),
     path('api/register', RegisterUser.as_view(), name='register'),
     # new
-    path('api/users', AllUsers.as_view(), name='allUsers'),
+    path('api/users/<str:city>/<str:appointment>', AllUsers.as_view(), name='allUsers'),
     path('api/reservations', ReservationsData.as_view(), name='reservations'),
     #reservations by member_id
     path('api/reservations/<int:memberid>', MemberReservationsData.as_view(), name='reservationsByMember'),

@@ -9,11 +9,16 @@ from lhl.models import Member, Location, Properties, Reservations, Ratings
 from lhl.serializers import GetUserDataSerializer, GetLocationDataSerializer, GetMemberDataSerializer, \
     GetPropertiesSerializer, RegisterSerializer, PostMemberDataSerializer, GetReservationsSerializer, \
     GetReservationsByMemberSerializer, GetRatingsByMemberSerializer
+from django.db.models import Q
 
 
 class AllUsers(APIView):
-    def get(self, request):
-        data = Member.objects.all()
+    # ie: location: 'Toronto',  date: 'cleaners with no reservations on this date', role: 'cleaner'
+    def get(self, request, city, appointment):
+        data = Member.objects.filter(role='cleaner')
+        data = data.filter(location__city=city)
+        data = data.filter(~Q(reservations__booking_date=appointment))
+
         serializer = GetMemberDataSerializer(data, many=True)
 
         return Response(serializer.data, status=status.HTTP_200_OK)
