@@ -3,7 +3,6 @@ from django.contrib.auth.models import User
 from django.core.validators import MinValueValidator, MaxValueValidator
 
 
-
 class Location(models.Model):
     # should just be in Cleaner model???
     address = models.CharField(max_length=200)
@@ -39,11 +38,10 @@ class Reservations(models.Model):
 
 
 class Ratings(models.Model):
-    reservation_id = models.ForeignKey(Reservations, on_delete=models.CASCADE)
+    reservation_id = models.OneToOneField(Reservations, on_delete=models.CASCADE)
     member_id = models.ForeignKey(Member, on_delete=models.CASCADE)
     message = models.CharField(max_length=2000)
     rating = models.IntegerField(validators=[MinValueValidator(0), MaxValueValidator(5)])
-    average_rating = models.IntegerField()
 
 
 # TO DO

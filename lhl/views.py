@@ -9,7 +9,6 @@ from lhl.models import Member, Location, Properties, Reservations, Ratings
 from lhl.serializers import GetUserDataSerializer, GetLocationDataSerializer, GetMemberDataSerializer, \
     GetPropertiesSerializer, RegisterSerializer, PostMemberDataSerializer, GetReservationsSerializer, \
     GetReservationsByMemberSerializer, GetRatingsByMember
-from django.db.models import Avg, Count
 
 
 class AllUsers(APIView):
@@ -132,9 +131,8 @@ class MemberReservationsData(APIView):
 
 class RatingByCleaner(APIView):
     def get(self, request, memberid):
-        avg_rating = Ratings.objects.filter(member_id_id=memberid).aggregate(Avg('rating'))
         memberdata = Member.objects.get(user_id=memberid)
-        data = Ratings.objects.filter(member_id_id=memberdata.id, average_rating=avg_rating)
+        data = Ratings.objects.filter(member_id_id=memberdata.id).order_by('-rating')
         serializer = GetRatingsByMember(data, many=True)
 
         return Response(serializer.data, status.HTTP_200_OK)

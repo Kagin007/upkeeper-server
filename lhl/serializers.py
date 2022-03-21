@@ -3,6 +3,7 @@ from django.contrib.auth.models import User
 from lhl.models import Location, Member, Properties, Reservations, Ratings
 from rest_framework.validators import UniqueValidator
 from django.contrib.auth.password_validation import validate_password
+from django.db.models import Avg, Count
 
 
 class GetUserDataSerializer(serializers.ModelSerializer):
@@ -78,14 +79,31 @@ class GetReservationsByMemberSerializer(serializers.ModelSerializer):
         fields = ['member_id', 'property_id', 'booking_date']
 
 
+class GetRatings(serializers.ModelSerializer):
+    class Meta:
+        model = Ratings
+        fields = ['member_id', 'reservation_id', 'message', 'rating']
+
+
 class GetRatingsByMember(serializers.ModelSerializer):
     member_id = serializers.PrimaryKeyRelatedField(many=False, queryset=Member.objects.all())
     reservation_id = serializers.PrimaryKeyRelatedField(many=False, queryset=Reservations.objects.all())
+    average_rating = serializers.SerializerMethodField()
+    rating_count = serializers.SerializerMethodField()
 
     class Meta:
         model = Ratings
-        fields = ['member_id', 'reservation_id', 'message', 'rating', 'average_rating']
+        fields = ['member_id', 'reservation_id', 'message', 'rating', 'average_rating', 'rating_count']
 
+    def get_average_rating(self, obj):
+        avg_rating = Ratings.objects.filter(member_id=obj.member_id).aggregate(Avg('rating'))
+        return avg_rating
+
+    def get_rating_count(self, obj):
+        rating_count = Ratings.objects.filter(member_id=obj.member_id).count()
+        return rating_count
+
+# avg = Ratings.objects.filter(member_id_id=memberid).aggregate(avg=Avg('rating'))
 
 # user stories
 # All Users
