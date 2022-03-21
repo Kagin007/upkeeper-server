@@ -8,7 +8,7 @@ from django.contrib.auth.models import User
 from lhl.models import Member, Location, Properties, Reservations, Ratings
 from lhl.serializers import GetUserDataSerializer, GetLocationDataSerializer, GetMemberDataSerializer, \
     GetPropertiesSerializer, RegisterSerializer, PostMemberDataSerializer, GetReservationsSerializer, \
-    GetReservationsByMemberSerializer, GetRatingsByMember
+    GetReservationsByMemberSerializer, GetRatingsByMemberSerializer
 
 
 class AllUsers(APIView):
@@ -133,7 +133,7 @@ class RatingByCleaner(APIView):
     def get(self, request, memberid):
         memberdata = Member.objects.get(user_id=memberid)
         data = Ratings.objects.filter(member_id_id=memberdata.id).order_by('-rating')
-        serializer = GetRatingsByMember(data, many=True)
+        serializer = GetRatingsByMemberSerializer(data, many=True)
 
         return Response(serializer.data, status.HTTP_200_OK)
 
@@ -142,7 +142,7 @@ class TopRatingByCleaner(APIView):
     def get(self, request, memberid):
         memberdata = Member.objects.get(user_id=memberid)
         data = Ratings.objects.filter(member_id_id=memberdata.id).order_by('-rating')[:1]
-        serializer = GetRatingsByMember(data, many=True)
+        serializer = GetRatingsByMemberSerializer(data, many=True)
 
         return Response(serializer.data, status.HTTP_200_OK)
 

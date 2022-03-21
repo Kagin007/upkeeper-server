@@ -3,7 +3,7 @@ from django.contrib.auth.models import User
 from lhl.models import Location, Member, Properties, Reservations, Ratings
 from rest_framework.validators import UniqueValidator
 from django.contrib.auth.password_validation import validate_password
-from django.db.models import Avg, Count
+from django.db.models import Avg, Count, Max
 
 
 class GetUserDataSerializer(serializers.ModelSerializer):
@@ -16,9 +16,6 @@ class GetLocationDataSerializer(serializers.ModelSerializer):
     class Meta:
         model = Location
         fields = ['id', 'address', 'city', 'province', 'longitude', 'latitude']
-
-
-
 
 
 class PostMemberDataSerializer(serializers.ModelSerializer):
@@ -72,12 +69,14 @@ class GetReservationsByMemberSerializer(serializers.ModelSerializer):
 
 
 class GetRatings(serializers.ModelSerializer):
+    member_id = serializers.PrimaryKeyRelatedField(many=False, queryset=Member.objects.all())
+
     class Meta:
         model = Ratings
         fields = ['member_id', 'reservation_id', 'message', 'rating']
 
 
-class GetRatingsByMember(serializers.ModelSerializer):
+class GetRatingsByMemberSerializer(serializers.ModelSerializer):
     member_id = serializers.PrimaryKeyRelatedField(many=False, queryset=Member.objects.all())
     reservation_id = serializers.PrimaryKeyRelatedField(many=False, queryset=Reservations.objects.all())
     average_rating = serializers.SerializerMethodField()
@@ -100,12 +99,19 @@ class GetMemberDataSerializer(serializers.ModelSerializer):
     # extends the user table into Members
     user = GetUserDataSerializer(many=False, read_only=True)
     location = GetLocationDataSerializer(many=False, read_only=True)
-    # user = serializers.PrimaryKeyRelatedField(many=False, read_only=True)
-    rating = GetRatingsByMember(many=True, read_only=True)
+    top_rating = serializers.SerializerMethodField()
+    # rating = serializers.PrimaryKeyRelatedField(many=False, queryset=Ratings.objects.all())
 
     class Meta:
         model = Member
-        fields = ['id', 'role', 'pay_rate', 'location', 'user', 'rating']
+        fields = ['id', 'role', 'pay_rate', 'location', 'user', 'top_rating']
+
+    def get_top_rating(self, obj):
+        top_rating = Ratings.objects.filter(member_id_id=obj.id).aggregate((Max('rating')))
+        return top_rating
+
+
+
 # avg = Ratings.objects.filter(member_id_id=memberid).aggregate(avg=Avg('rating'))
 
 # user stories
