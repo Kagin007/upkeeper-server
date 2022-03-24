@@ -4,6 +4,54 @@ from lhl.models import Location, Member, Properties, Reservations, Ratings
 from rest_framework.validators import UniqueValidator
 from django.contrib.auth.password_validation import validate_password
 from django.db.models import Avg, Count, Max
+from django.contrib.auth import authenticate
+
+
+class UserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ('username', 'id')
+
+
+class LoginSerializer(serializers.Serializer):
+    """
+    This serializer defines two fields for authentication:
+      * username
+      * password.
+    It will try to authenticate the user with when validated.
+    """
+    username = serializers.CharField(
+        label="Username",
+        write_only=True
+    )
+    password = serializers.CharField(
+        label="Password",
+        # This will be used when the DRF browsable API is enabled
+        style={'input_type': 'password'},
+        trim_whitespace=False,
+        write_only=True
+    )
+
+    def validate(self, attrs):
+        # Take username and password from request
+        username = attrs.get('username')
+        password = attrs.get('password')
+
+        if username and password:
+            # Try to authenticate the user using Django auth framework.
+            user = authenticate(request=self.context.get('request'),
+                                username=username, password=password)
+            if not user:
+                # If we don't have a regular user, raise a ValidationError
+                msg = 'Access denied: wrong username or password.'
+                raise serializers.ValidationError(msg, code='authorization')
+        else:
+            msg = 'Both "username" and "password" are required.'
+            raise serializers.ValidationError(msg, code='authorization')
+        # We have a valid user, put it in the serializer's validated_data.
+        # It will be used in the view.
+        attrs['user'] = user
+        return attrs
 
 
 class GetUserDataSerializer(serializers.ModelSerializer):
@@ -24,7 +72,7 @@ class PostMemberDataSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Member
-        fields = ['id', 'role', 'pay_rate', 'location', 'user']
+        fields = ['id', 'role', 'pay_rate', 'imgurl', 'location', 'user']
 
 
 class GetPropertiesSerializer(serializers.ModelSerializer):
@@ -99,17 +147,31 @@ class GetMemberDataSerializer(serializers.ModelSerializer):
     # extends the user table into Members
     user = GetUserDataSerializer(many=False, read_only=True)
     location = GetLocationDataSerializer(many=False, read_only=True)
-    top_rating = serializers.SerializerMethodField()
+    average_rating = serializers.SerializerMethodField()
+    rating_count = serializers.SerializerMethodField()
     # rating = serializers.PrimaryKeyRelatedField(many=False, queryset=Ratings.objects.all())
+    top_comment = serializers.SerializerMethodField()
+
 
     class Meta:
         model = Member
-        fields = ['id', 'role', 'pay_rate', 'location', 'user', 'top_rating']
+        fields = ['id', 'role', 'pay_rate', 'location', 'user', 'imgurl', 'average_rating', 'rating_count', 'top_comment']
 
-    def get_top_rating(self, obj):
-        top_rating = Ratings.objects.filter(member_id_id=obj.id).aggregate((Max('rating')))
-        return top_rating
+    def get_average_rating(self, obj):
+        avg_rating = Ratings.objects.filter(member_id=obj.id).aggregate(Avg('rating'))
+        return avg_rating
 
+    def get_rating_count(self, obj):
+        rating_count = Ratings.objects.filter(member_id=obj.id).count()
+        return rating_count
+
+    def get_top_comment(self, obj):
+        ratings = Ratings.objects.filter(member_id=obj.id).order_by('-rating')[:1]
+        if ratings:
+            return ratings[0].message
+        else:
+            empty = []
+            return empty
 
 
 # avg = Ratings.objects.filter(member_id_id=memberid).aggregate(avg=Avg('rating'))

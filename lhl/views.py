@@ -4,12 +4,56 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework import generics
 from rest_framework.response import Response
 from rest_framework import status
+from django.contrib.auth import login, logout
 from django.contrib.auth.models import User
+from rest_framework.authtoken.views import ObtainAuthToken
+from rest_framework.authtoken.models import Token
+from rest_framework.response import Response
 from lhl.models import Member, Location, Properties, Reservations, Ratings
 from lhl.serializers import GetUserDataSerializer, GetLocationDataSerializer, GetMemberDataSerializer, \
     GetPropertiesSerializer, RegisterSerializer, PostMemberDataSerializer, GetReservationsSerializer, \
-    GetReservationsByMemberSerializer, GetRatingsByMemberSerializer
+    GetReservationsByMemberSerializer, GetRatingsByMemberSerializer, LoginSerializer, UserSerializer
 from django.db.models import Q
+
+
+class ExampleView(APIView):
+    permission_classes = (IsAuthenticated,)
+
+    def get(self, request, format=None):
+        serializer = UserSerializer(request.user)
+        return Response(serializer.data)
+
+
+class LoginView(APIView):
+    # This view should be accessible also for unauthenticated users.
+    def post(self, request, format=None):
+        serializer = LoginSerializer(data=self.request.data,
+            context={ 'request': self.request })
+        serializer.is_valid(raise_exception=True)
+        user = serializer.validated_data['user']
+        login(request, user)
+        return Response(None, status=status.HTTP_202_ACCEPTED)
+
+
+class LogoutView(APIView):
+    # This view should be accessible also for unauthenticated users.
+    def get(self, request, format=None):
+        logout(request)
+        return Response(None, status=status.HTTP_202_ACCEPTED)
+
+
+class CustomAuthToken(ObtainAuthToken):
+    def post(self, request, *args, **kwargs):
+        serializer = self.serializer_class(data=request.data,
+                                           context={'request': request})
+        serializer.is_valid(raise_exception=True)
+        user = serializer.validated_data['user']
+        token, created = Token.objects.get_or_create(user=user)
+        return Response({
+            'token': token.key,
+            'user_id': user.pk,
+            'email': user.email
+        })
 
 
 class AllUsers(APIView):
@@ -17,6 +61,7 @@ class AllUsers(APIView):
     def get(self, request, city, appointment):
         data = Member.objects.filter(role='cleaner')
         data = data.filter(location__city=city)
+        # the Q reverses the query to look for where there are NO reservations for a cleaner on this date
         data = data.filter(~Q(reservations__booking_date=appointment))
 
         serializer = GetMemberDataSerializer(data, many=True)
@@ -25,8 +70,8 @@ class AllUsers(APIView):
 
 
 class GetUserData(APIView):
-    if settings.DEBUG is False:
-        permission_classes = (IsAuthenticated,)
+    # if settings.DEBUG is True:
+    permission_classes = (IsAuthenticated,)
 
     def get(self, request, username):
         data = User.objects.filter(username=username)

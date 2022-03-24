@@ -1,5 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
+
+
 from django.core.validators import MinValueValidator, MaxValueValidator
 
 
@@ -18,6 +20,7 @@ class Member(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     location = models.OneToOneField(Location, on_delete=models.CASCADE)
     pay_rate = models.DecimalField(max_digits=10, decimal_places=2)
+    imgurl = models.CharField(max_length=2000)
 
 
 # properties to rent. An owner can have multiple properties
@@ -29,7 +32,7 @@ class Properties(models.Model):
     longitude = models.DecimalField(max_digits=8, decimal_places=4)
     latitude = models.DecimalField(max_digits=8, decimal_places=4)
 
-# new
+
 class Reservations(models.Model):
     member_id = models.ForeignKey(Member, on_delete=models.CASCADE)
     property_id = models.ForeignKey(Properties, on_delete=models.CASCADE)
