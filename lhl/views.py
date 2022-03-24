@@ -6,7 +6,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from django.contrib.auth import login, logout
 from django.contrib.auth.models import User
-from rest_framework.authtoken.views import ObtainAuthToken
+# from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.authtoken.models import Token
 from rest_framework.response import Response
 from lhl.models import Member, Location, Properties, Reservations, Ratings
@@ -17,43 +17,46 @@ from django.db.models import Q
 
 
 class ExampleView(APIView):
-    permission_classes = (IsAuthenticated,)
+    permission_classes = [IsAuthenticated]
 
-    def get(self, request, format=None):
+    def get(self, request):
         serializer = UserSerializer(request.user)
         return Response(serializer.data)
 
 
 class LoginView(APIView):
     # This view should be accessible also for unauthenticated users.
-    def post(self, request, format=None):
+    def post(self, request):
         serializer = LoginSerializer(data=self.request.data,
             context={ 'request': self.request })
         serializer.is_valid(raise_exception=True)
         user = serializer.validated_data['user']
         login(request, user)
-        return Response(None, status=status.HTTP_202_ACCEPTED)
+        u = UserSerializer(request.user)
+        return Response(u.data, status=status.HTTP_202_ACCEPTED)
 
 
 class LogoutView(APIView):
     # This view should be accessible also for unauthenticated users.
-    def get(self, request, format=None):
+    def get(self, request):
         logout(request)
         return Response(None, status=status.HTTP_202_ACCEPTED)
 
-
-class CustomAuthToken(ObtainAuthToken):
-    def post(self, request, *args, **kwargs):
-        serializer = self.serializer_class(data=request.data,
-                                           context={'request': request})
-        serializer.is_valid(raise_exception=True)
-        user = serializer.validated_data['user']
-        token, created = Token.objects.get_or_create(user=user)
-        return Response({
-            'token': token.key,
-            'user_id': user.pk,
-            'email': user.email
-        })
+def logout_view(request):
+    logout(request)
+    # Redirect to a success page.
+# class CustomAuthToken(ObtainAuthToken):
+#     def post(self, request, *args, **kwargs):
+#         serializer = self.serializer_class(data=request.data,
+#                                            context={'request': request})
+#         serializer.is_valid(raise_exception=True)
+#         user = serializer.validated_data['user']
+#         token, created = Token.objects.get_or_create(user=user)
+#         return Response({
+#             'token': token.key,
+#             'user_id': user.pk,
+#             'email': user.email
+#         })
 
 
 class AllUsers(APIView):
