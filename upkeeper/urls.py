@@ -44,7 +44,6 @@ urlpatterns = [
     #reservations by member_id
     path('api/reservations/<int:memberid>', MemberReservationsData.as_view(), name='reservationsByMember'),
     # ratings
-
     path('api/member/<int:memberid>/ratings', RatingByCleaner.as_view(), name='ratingByCleaner'),
     path('api/member/<int:memberid>/top/ratings', TopRatingByCleaner.as_view(), name='topRating')
 ]

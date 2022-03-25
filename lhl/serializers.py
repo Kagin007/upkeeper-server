@@ -101,10 +101,13 @@ class RegisterSerializer(serializers.ModelSerializer):
         }
 
 
-class GetReservationsSerializer(serializers.ModelSerializer):
+class ReservationsSerializer(serializers.ModelSerializer):
+    # member = serializers.PrimaryKeyRelatedField(many=False, queryset=Member.objects.all())
+    # property = serializers.PrimaryKeyRelatedField(many=False, queryset=Properties.objects.all())
+
     class Meta:
         model = Reservations
-        fields = ['member_id', 'property_id', 'booking_date']
+        fields = ['booking_date', 'member_id', 'property_id']
 
 
 class GetReservationsByMemberSerializer(serializers.ModelSerializer):

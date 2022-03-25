@@ -11,7 +11,7 @@ from rest_framework.authtoken.models import Token
 from rest_framework.response import Response
 from lhl.models import Member, Location, Properties, Reservations, Ratings
 from lhl.serializers import GetUserDataSerializer, GetLocationDataSerializer, GetMemberDataSerializer, \
-    GetPropertiesSerializer, RegisterSerializer, PostMemberDataSerializer, GetReservationsSerializer, \
+    GetPropertiesSerializer, RegisterSerializer, PostMemberDataSerializer, ReservationsSerializer, \
     GetReservationsByMemberSerializer, GetRatingsByMemberSerializer, LoginSerializer, UserSerializer
 from django.db.models import Q
 
@@ -165,13 +165,24 @@ class RegisterUser(APIView):
 
 
 class ReservationsData(APIView):
+    if settings.DEBUG is False:
+        permission_classes = (IsAuthenticated,)
+
     def get(self, request):
         # memberdata = Member.objects.get(user_id=userid)
         data = Reservations.objects.all()
-        serializer = GetReservationsSerializer(data, many=True)
+        serializer = ReservationsSerializer(data, many=True)
 
         return Response(serializer.data, status=status.HTTP_200_OK)
         # now need a serializer for reservation data
+
+    def post(self, request):
+        serializer = ReservationsSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class MemberReservationsData(APIView):
@@ -181,6 +192,7 @@ class MemberReservationsData(APIView):
         serializer = GetReservationsByMemberSerializer(data, many=True)
 
         return Response(serializer.data, status.HTTP_200_OK)
+
 
 
 class RatingByCleaner(APIView):
