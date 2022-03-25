@@ -80,7 +80,7 @@ class GetPropertiesSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Properties
-        fields = ['address', 'city', 'country', 'longitude', 'latitude', 'member_id']
+        fields = ['id', 'address', 'city', 'country', 'longitude', 'latitude', 'member_id']
 
 
 class RegisterSerializer(serializers.ModelSerializer):
@@ -154,7 +154,6 @@ class GetMemberDataSerializer(serializers.ModelSerializer):
     rating_count = serializers.SerializerMethodField()
     # rating = serializers.PrimaryKeyRelatedField(many=False, queryset=Ratings.objects.all())
     top_comment = serializers.SerializerMethodField()
-
 
     class Meta:
         model = Member
