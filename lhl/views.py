@@ -42,6 +42,7 @@ class LogoutView(APIView):
         logout(request)
         return Response(None, status=status.HTTP_202_ACCEPTED)
 
+
 def logout_view(request):
     logout(request)
     # Redirect to a success page.
