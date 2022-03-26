@@ -14,6 +14,7 @@ from lhl.serializers import GetUserDataSerializer, GetLocationDataSerializer, Ge
     GetPropertiesSerializer, RegisterSerializer, PostMemberDataSerializer, ReservationsSerializer, \
     GetReservationsByMemberSerializer, GetRatingsByMemberSerializer, LoginSerializer, UserSerializer
 from django.db.models import Q
+from django.views.decorators.csrf import csrf_exempt
 
 
 class ExampleView(APIView):
@@ -26,6 +27,7 @@ class ExampleView(APIView):
 
 class LoginView(APIView):
     # This view should be accessible also for unauthenticated users.
+    @csrf_exempt
     def post(self, request):
         serializer = LoginSerializer(data=self.request.data,
             context={ 'request': self.request })
@@ -103,6 +105,7 @@ class LocationData(APIView):
             return Response(locations, status=status.HTTP_400_BAD_REQUEST)
         return Response(locations, status=status.HTTP_200_OK)
 
+    @csrf_exempt
     def post(self, request):
         # deserialize the json into objects to put into database
         serializer = GetLocationDataSerializer(data=request.data)
@@ -123,6 +126,7 @@ class GetMember(APIView):
 
         return Response(serializer.data, status=status.HTTP_200_OK)
 
+    @csrf_exempt
     def post(self, request):
         serializer = PostMemberDataSerializer(data=request.data)
         # checks for valid form
@@ -143,6 +147,7 @@ class PropertiesData(APIView):
 
         return Response(serializer.data, status=status.HTTP_200_OK)
 
+    @csrf_exempt
     def post(self, request, userid):
         # deserialize the json into objects to put into database
         serializer = GetPropertiesSerializer(data=request.data)
@@ -155,6 +160,7 @@ class PropertiesData(APIView):
 
 
 class RegisterUser(APIView):
+    @csrf_exempt
     def post(self, request):
         serializer = RegisterSerializer(data=request.data)
         if serializer.is_valid():
@@ -176,6 +182,7 @@ class ReservationsData(APIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
         # now need a serializer for reservation data
 
+    @csrf_exempt
     def post(self, request):
         serializer = ReservationsSerializer(data=request.data)
         if serializer.is_valid():
