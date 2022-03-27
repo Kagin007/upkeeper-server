@@ -114,7 +114,7 @@ class MemberSerializer(serializers.ModelSerializer):
     user = GetUserDataSerializer(many=False, read_only=True)
     class Meta:
         model = Member
-        fields = ['id', 'pay_rate', 'location_id', 'user', 'imgurl']
+        fields = ['id', 'role', 'pay_rate', 'location_id', 'user', 'imgurl']
 
 
 class GetReservationsByMemberSerializer(serializers.ModelSerializer):
