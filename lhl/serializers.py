@@ -111,9 +111,10 @@ class ReservationsSerializer(serializers.ModelSerializer):
 
 
 class MemberSerializer(serializers.ModelSerializer):
+    user = GetUserDataSerializer(many=False, read_only=True)
     class Meta:
         model = Member
-        fields = ['id', 'pay_rate', 'location_id', 'user_id', 'imgurl']
+        fields = ['id', 'pay_rate', 'location_id', 'user', 'imgurl']
 
 
 class GetReservationsByMemberSerializer(serializers.ModelSerializer):
