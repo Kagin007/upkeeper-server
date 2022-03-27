@@ -12,7 +12,7 @@ from rest_framework.response import Response
 from lhl.models import Member, Location, Properties, Reservations, Ratings
 from lhl.serializers import GetUserDataSerializer, GetLocationDataSerializer, GetMemberDataSerializer, \
     GetPropertiesSerializer, RegisterSerializer, PostMemberDataSerializer, ReservationsSerializer, \
-    GetReservationsByMemberSerializer, GetRatingsByMemberSerializer, LoginSerializer, UserSerializer
+    GetReservationsByMemberSerializer, GetRatingsByMemberSerializer, LoginSerializer, UserSerializer, MemberSerializer
 from django.db.models import Q
 from django.views.decorators.csrf import csrf_exempt
 
@@ -194,12 +194,14 @@ class ReservationsData(APIView):
 
 class MemberReservationsData(APIView):
     def get(self, request, memberid):
-        memberdata = Member.objects.get(user_id=memberid)
-        data = Reservations.objects.filter(member_id_id=memberdata.id)
+        # filter member model where user_id is same as member_id. Should maybe do id=memberid?
+        # But would technically be the same result because user_id should always is the same as memberid
+        data = Member.objects.get(id=memberid)
+        data = Reservations.objects.filter(member_id_id=data.id)
+
         serializer = GetReservationsByMemberSerializer(data, many=True)
 
         return Response(serializer.data, status.HTTP_200_OK)
-
 
 
 class RatingByCleaner(APIView):

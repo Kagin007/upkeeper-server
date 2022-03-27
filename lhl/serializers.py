@@ -110,13 +110,19 @@ class ReservationsSerializer(serializers.ModelSerializer):
         fields = ['booking_date', 'member_id', 'property_id']
 
 
+class MemberSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Member
+        fields = ['id', 'pay_rate', 'location_id', 'user_id', 'imgurl']
+
+
 class GetReservationsByMemberSerializer(serializers.ModelSerializer):
-    member_id = serializers.PrimaryKeyRelatedField(many=False, queryset=Member.objects.all())
-    property_id = serializers.PrimaryKeyRelatedField(many=False, queryset=Properties.objects.all())
+    member_id = MemberSerializer(many=False, read_only=True)
+    property_id = GetPropertiesSerializer(many=False, read_only=True)
 
     class Meta:
         model = Reservations
-        fields = ['member_id', 'property_id', 'booking_date']
+        fields = ['member_id_id', 'property_id', 'booking_date', 'is_complete', 'member_id', 'property_id']
 
 
 class GetRatings(serializers.ModelSerializer):

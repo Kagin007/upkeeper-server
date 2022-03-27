@@ -34,8 +34,8 @@ class Properties(models.Model):
 
 
 class Reservations(models.Model):
-    member_id = models.ForeignKey(Member, on_delete=models.CASCADE)
-    property_id = models.ForeignKey(Properties, on_delete=models.CASCADE)
+    member_id = models.OneToOneField(Member, on_delete=models.CASCADE)
+    property_id = models.OneToOneField(Properties, on_delete=models.CASCADE)
     booking_date = models.DateField()
     is_complete = models.BooleanField(default=False)
 
