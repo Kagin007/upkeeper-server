@@ -29,13 +29,14 @@ class Properties(models.Model):
     address = models.CharField(max_length=200)
     city = models.CharField(max_length=200)
     country = models.CharField(max_length=200)
+    imgurl = models.CharField(max_length=2000)
     longitude = models.DecimalField(max_digits=8, decimal_places=4)
     latitude = models.DecimalField(max_digits=8, decimal_places=4)
 
 
 class Reservations(models.Model):
-    member_id = models.OneToOneField(Member, on_delete=models.CASCADE)
-    property_id = models.OneToOneField(Properties, on_delete=models.CASCADE)
+    member_id = models.ForeignKey(Member, on_delete=models.CASCADE)
+    property_id = models.ForeignKey(Properties, on_delete=models.CASCADE)
     booking_date = models.DateField()
     is_complete = models.BooleanField(default=False)
 

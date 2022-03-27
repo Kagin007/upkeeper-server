@@ -123,7 +123,7 @@ class GetReservationsByMemberSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Reservations
-        fields = ['member_id_id', 'property_id', 'booking_date', 'is_complete', 'member_id', 'property_id']
+        fields = ['property_id', 'booking_date', 'is_complete', 'member_id', 'property_id']
 
 
 class GetRatings(serializers.ModelSerializer):
