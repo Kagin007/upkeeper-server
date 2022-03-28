@@ -21,6 +21,7 @@ from django.views.decorators.csrf import csrf_exempt
 class ExampleView(APIView):
     permission_classes = [IsAuthenticated]
 
+    @csrf_exempt
     def get(self, request):
         serializer = UserSerializer(request.user)
         return Response(serializer.data)
@@ -44,6 +45,7 @@ class LoginView(APIView):
 
 class LogoutView(APIView):
     # This view should be accessible also for unauthenticated users.
+    @csrf_exempt
     def get(self, request):
         logout(request)
         return Response(None, status=status.HTTP_202_ACCEPTED)
@@ -68,6 +70,7 @@ def logout_view(request):
 
 class AllUsers(APIView):
     # ie: location: 'Toronto',  date: 'cleaners with no reservations on this date', role: 'cleaner'
+    @csrf_exempt
     def get(self, request, city, appointment):
         data = Member.objects.filter(role='cleaner')
         data = data.filter(location__city=city)
@@ -83,6 +86,7 @@ class GetUserData(APIView):
     # if settings.DEBUG is True:
     permission_classes = (IsAuthenticated,)
 
+    @csrf_exempt
     def get(self, request, username):
         data = User.objects.filter(username=username)
         serializer = GetUserDataSerializer(data, many=True)
@@ -94,6 +98,7 @@ class LocationData(APIView):
     if settings.DEBUG is False:
         permission_classes = (IsAuthenticated,)
 
+    @csrf_exempt
     def get(self, request, userid):
         try:
             memberdata = Member.objects.get(user_id=userid)
@@ -124,6 +129,7 @@ class GetMember(APIView):
     if settings.DEBUG is False:
         permission_classes = (IsAuthenticated,)
 
+    @csrf_exempt
     def get(self, request, userid):
         memberdata = Member.objects.get(user_id=userid)
         serializer = GetMemberDataSerializer(memberdata)
@@ -144,6 +150,7 @@ class PropertiesData(APIView):
     if settings.DEBUG is False:
         permission_classes = (IsAuthenticated,)
 
+    @csrf_exempt
     def get(self, request, userid):
         memberdata = Member.objects.get(user_id=userid)
         propertiesdata = Properties.objects.filter(member_id_id=memberdata.id)
@@ -178,6 +185,7 @@ class ReservationsData(APIView):
     if settings.DEBUG is False:
         permission_classes = (IsAuthenticated,)
 
+    @csrf_exempt
     def get(self, request):
         # memberdata = Member.objects.get(user_id=userid)
         data = Reservations.objects.all()
@@ -197,6 +205,7 @@ class ReservationsData(APIView):
 
 
 class MemberCleanerReservationsData(APIView):
+    @csrf_exempt
     def get(self, request, userid):
         # filter member model where user_id is same as member_id. Should maybe do id=memberid?
         # But would technically be the same result because user_id should always is the same as memberid
@@ -210,6 +219,7 @@ class MemberCleanerReservationsData(APIView):
 
 # review for understanding
 class MemberOwnerReservationsData(APIView):
+    @csrf_exempt
     def get(self, request, userid):
         memberdata = Member.objects.get(user_id=userid)
         r = {}
@@ -223,6 +233,7 @@ class MemberOwnerReservationsData(APIView):
 
 
 class RatingByCleaner(APIView):
+    @csrf_exempt
     def get(self, request, memberid):
         memberdata = Member.objects.get(user_id=memberid)
         data = Ratings.objects.filter(member_id_id=memberdata.id).order_by('-rating')
@@ -232,6 +243,7 @@ class RatingByCleaner(APIView):
 
 
 class TopRatingByCleaner(APIView):
+    @csrf_exempt
     def get(self, request, memberid):
         memberdata = Member.objects.get(user_id=memberid)
         data = Ratings.objects.filter(member_id_id=memberdata.id).order_by('-rating')[:1]
