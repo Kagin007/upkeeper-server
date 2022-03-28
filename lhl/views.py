@@ -13,6 +13,7 @@ from lhl.models import Member, Location, Properties, Reservations, Ratings
 from lhl.serializers import GetUserDataSerializer, GetLocationDataSerializer, GetMemberDataSerializer, \
     GetPropertiesSerializer, RegisterSerializer, PostMemberDataSerializer, ReservationsSerializer, \
     GetReservationsByMemberSerializer, GetRatingsByMemberSerializer, LoginSerializer, UserSerializer, MemberSerializer
+
 from django.db.models import Q
 from django.views.decorators.csrf import csrf_exempt
 
@@ -35,6 +36,9 @@ class LoginView(APIView):
         user = serializer.validated_data['user']
         login(request, user)
         u = UserSerializer(request.user)
+        # memberdata = Member.objects.get(user=request.user)
+        # m = GetMemberDataSerializer(memberdata)
+        # m .data went in the response
         return Response(u.data, status=status.HTTP_202_ACCEPTED)
 
 
@@ -192,16 +196,30 @@ class ReservationsData(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-class MemberReservationsData(APIView):
-    def get(self, request, memberid):
+class MemberCleanerReservationsData(APIView):
+    def get(self, request, userid):
         # filter member model where user_id is same as member_id. Should maybe do id=memberid?
         # But would technically be the same result because user_id should always is the same as memberid
-        data = Member.objects.get(id=memberid)
-        data = Reservations.objects.filter(member_id_id=data.id)
+        memberdata = Member.objects.get(user_id=userid)
+        reservationdata = Reservations.objects.filter(member_id_id=memberdata.id)
 
-        serializer = GetReservationsByMemberSerializer(data, many=True)
+        serializer = GetReservationsByMemberSerializer(reservationdata, many=True)
 
         return Response(serializer.data, status.HTTP_200_OK)
+
+
+# review for understanding
+class MemberOwnerReservationsData(APIView):
+    def get(self, request, userid):
+        memberdata = Member.objects.get(user_id=userid)
+        r = {}
+        propertydata = Properties.objects.filter(member_id=memberdata.id)
+        for item in propertydata:
+            reservationdata = Reservations.objects.filter(property_id=item.id)
+            serializer = GetReservationsByMemberSerializer(reservationdata, many=True)
+            dictkey = item.id
+            r.update({dictkey: serializer.data})
+        return Response(r, status.HTTP_200_OK)
 
 
 class RatingByCleaner(APIView):

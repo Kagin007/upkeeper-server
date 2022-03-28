@@ -17,7 +17,8 @@ from django.contrib import admin
 from django.urls import path
 from rest_framework.authtoken.views import obtain_auth_token
 from lhl.views import GetUserData, LocationData, GetMember, PropertiesData, RegisterUser, AllUsers, ReservationsData, \
-                        MemberReservationsData, RatingByCleaner, TopRatingByCleaner, LoginView, ExampleView, LogoutView
+                        MemberCleanerReservationsData, RatingByCleaner, TopRatingByCleaner, LoginView, ExampleView, LogoutView, \
+                        MemberOwnerReservationsData
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -41,8 +42,10 @@ urlpatterns = [
     # new
     path('api/users/<str:city>/<str:appointment>', AllUsers.as_view(), name='allUsers'),
     path('api/reservations', ReservationsData.as_view(), name='reservations'),
-    #reservations by member_id
-    path('api/reservations/<int:memberid>', MemberReservationsData.as_view(), name='reservationsByMember'),
+    #reservations by cleaner's member_id
+    path('api/reservations/cleaner/<int:userid>', MemberCleanerReservationsData.as_view(), name='reservationsByMember'),
+    #reservations by owner's member_id
+    path('api/reservations/owner/<int:userid>', MemberOwnerReservationsData.as_view(), name='reservationsbyOwner'),
     # ratings
     path('api/member/<int:memberid>/ratings', RatingByCleaner.as_view(), name='ratingByCleaner'),
     path('api/member/<int:memberid>/top/ratings', TopRatingByCleaner.as_view(), name='topRating')
