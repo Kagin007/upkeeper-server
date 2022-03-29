@@ -49,4 +49,5 @@ urlpatterns = [
     # ratings
     path('api/member/<int:memberid>/ratings', RatingByCleaner.as_view(), name='ratingByCleaner'),
     path('api/member/<int:memberid>/top/ratings', TopRatingByCleaner.as_view(), name='topRating')
+    #ratings for each reservation
 ]
